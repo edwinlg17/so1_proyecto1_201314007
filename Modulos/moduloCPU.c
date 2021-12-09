@@ -22,14 +22,19 @@ static int _escribir(struct seq_file *archivo, void *v){
 	unsigned long rss;
 
 	for_each_process(proceso){
-		seq_printf(archivo, "nombre: %s, PID: %d, estado:%li \n", proceso->comm, proceso->pid, proceso->state);
+		if (proceso->mm) {
+			rss = get_mm_rss(proceso->mm) << PAGE_SHIFT;
+			seq_printf(archivo, "nombre: %s, PID: %d, estado: %ld, ram: %lu \n", proceso->comm, proceso->pid, proceso->state, rss/1024);
+		} else {
+			seq_printf(archivo, "nombre: %s, PID: %d, estado:%ld \n", proceso->comm, proceso->pid, proceso->state);
+		}
 
 		list_for_each(hijos, &(proceso->children)){
 			hijo = list_entry(hijos, struct task_struct, sibling);
 
 			if (hijo->mm) {
 				rss = get_mm_rss(hijo->mm) << PAGE_SHIFT;
-				seq_printf(archivo, "\tnombre: %s, PID: %d, estado: %ld, ram: %lu \n", hijo->comm, hijo->pid, hijo->state, rss);
+				seq_printf(archivo, "\tnombre: %s, PID: %d, estado: %ld, ram: %lu \n", hijo->comm, hijo->pid, hijo->state, rss/1024);
 			} else {
 				seq_printf(archivo, "\tnombre: %s, PID: %d, estado:%ld \n", hijo->comm, hijo->pid, hijo->state);
 			}
