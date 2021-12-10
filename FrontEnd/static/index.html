@@ -19,27 +19,7 @@
 	-->
 </head>
 
-<body id="reportsPage">
-    <script>
-        let socket = new WebSocket("ws://127.0.0.1:8080/ws");
-        console.log("Attempting Connection...");
-
-        socket.onopen = () => {
-            console.log("Successfully Connected");
-            socket.send("Hi From the Client!")
-        };
-        
-        socket.onclose = event => {
-            console.log("Socket Closed Connection: ", event);
-            socket.send("Client Closed!")
-        };
-
-        socket.onerror = error => {
-            console.log("Socket Error: ", error);
-        };
-
-    </script>
-    
+<body id="reportsPage">   
     <div class="" id="home">
         <nav class="navbar navbar-expand-xl">
             <div class="container h-100">
@@ -305,21 +285,28 @@
     </script>
 
 <script>
-    let socket = new WebSocket("ws://127.0.0.1:8080/ws");
+    let socket = new WebSocket("ws://192.168.49.129:8080/ws");
     console.log("Attempting Connection...");
 
     socket.onopen = () => {
-        console.log("Successfully Connected");
-        socket.send("Hi From the Client!")
+        console.log("Conexion establecida");
+        socket.send(JSON.stringify({Email:"cliente",Username:"ClienteNode",Message:"Hola"}))
+        //socket.send("hola desde el cliente")
     };
     
+    socket.onmessage = event => {
+        const msn = JSON.parse(event.data);
+        console.log(msn);
+    }
+
     socket.onclose = event => {
-        console.log("Socket Closed Connection: ", event);
-        socket.send("Client Closed!")
+        console.log("Conexion desconectada: ", event);
+        socket.send(JSON.stringify({Email:"cliente",Username:"ClienteNode",Message:"Hola"}))
+        //socket.send("Cliente Desconectado!")
     };
 
     socket.onerror = error => {
-        console.log("Socket Error: ", error);
+        console.log("Error Socket: ", error);
     };
 
 </script>

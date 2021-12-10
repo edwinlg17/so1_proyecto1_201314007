@@ -1,59 +1,57 @@
 package main
 
+// Librerias
 import (
-	"fmt"
 	"log"
 	"net/http"
+
+	"time"
 
 	"github.com/gorilla/websocket"
 )
 
-var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
+var upgrader = websocket.Upgrader{}
+
+type Mensaje struct {
+	Valor1 string `json:"valor1"`
+	Valor2 string `json:"valor2"`
+	Valor3 string `json:"valor3"`
 }
 
-func reader(conn *websocket.Conn) {
-	for {
-		messageType, p, err := conn.ReadMessage()
-		if err != nil {
-			log.Println(err)
-			return
-		}
-
-		log.Println(string(p))
-
-		if err := conn.WriteMessage(messageType, p); err != nil {
-			log.Println(err)
-			return
-		}
+func envio(conn *websocket.Conn) {
+	msg := Mensaje{
+		Valor1: "Esta",
+		Valor2: "es una",
+		Valor3: "prueba",
 	}
-}
 
-func setupRoutes() {
-	http.HandleFunc("/", homePage)
-	http.HandleFunc("/ws", endPoint)
-	log.Fatal(http.ListenAndServe(":8080", nil))
-}
+	for {
+		if err := conn.WriteJSON(msg); err != nil {
+			log.Println(err)
+			defer conn.Close()
+			return
+		}
+		time.Sleep(time.Duration(1) * time.Second)
+	}
 
-func homePage(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "home page")
 }
 
 func endPoint(w http.ResponseWriter, r *http.Request) {
+	// cors
 	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
 
+	// El método Upgrade() permite cambiar nuesra solicitud GET inicial a una completa en WebSocket,
+	// si hay un error lo mostramos en consola pero no salimos.
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println(err)
 	}
 
-	fmt.Println(w, "Cliente Conectado")
-
-	reader(ws)
+	// ejecuto la rutino
+	go envio(ws)
 }
 
 func main() {
-	fmt.Println("hola")
-	setupRoutes()
+	http.HandleFunc("/ws", endPoint)
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }
