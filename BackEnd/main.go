@@ -31,8 +31,8 @@ type infoRam struct {
 }
 
 type informacion struct {
-	Ram      infoRam `json:"Ram"`
-	CPU      string  `json:"CPU"`
+	RAM      infoRam `json:"RAM"`
+	CPU      float64 `json:"CPU"`
 	Procesos string  `json:"Procesos"`
 }
 
@@ -43,7 +43,9 @@ func envio(conn *websocket.Conn) {
 		msg := informacion{}
 
 		// obtengo la informacion de la ram
-		msg.Ram = obtenerInformacionRam()
+		msg.RAM = obtenerInformacionRam()
+
+		msg.CPU = obtenerInformacionCPU()
 
 		// envio por el socket la informacion
 		if err := conn.WriteJSON(msg); err != nil {
@@ -53,6 +55,13 @@ func envio(conn *websocket.Conn) {
 		}
 		time.Sleep(time.Duration(1) * time.Second)
 	}
+}
+
+func obtenerInformacionCPU() float64 {
+	if s, err := strconv.ParseFloat(ejecutarComando("top -bn 1 -i -c | head -n 3 | tail -1 | awk {'print $8'}"), 64); err == nil {
+		return s
+	}
+	return 0
 }
 
 func obtenerInformacionRam() infoRam {
@@ -112,8 +121,6 @@ func endPoint(w http.ResponseWriter, r *http.Request) {
 
 // Metodo Main
 func main() {
-	//fmt.Println(ejecutarComando("free -m | head -n 2 | tail -1 | awk {'print $6'}"))
-	//fmt.Println(ejecutarComando("cat /proc/moduloRAM"))
 	http.HandleFunc("/ws", endPoint)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

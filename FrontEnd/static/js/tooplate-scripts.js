@@ -10,15 +10,23 @@ socket.onopen = () => {
 };
 
 socket.onmessage = event => {
-     const msn = JSON.parse(event.data);
+     const msg = JSON.parse(event.data);
 
-     var total = msn.Ram.Total;
-     var libre = msn.Ram.Libre + msn.Ram.BufferCached;
+     var usoCpu = 100 - msg.CPU;
+     var total = msg.RAM.Total;
+     var libre = msg.RAM.Libre + msg.RAM.BufferCached;
      var usada = total - libre;
+
+     configLine.data.datasets[0].data.shift();
+     configLine.data.datasets[0].data.push(usoCpu);
+     configLine.data.datasets[0].label = "RAM " + Math.round(usoCpu) + "%";
+
+     lineChart.options = optionsLine;
+     lineChart.update();
 
      configLine2.data.datasets[0].data.shift();
      configLine2.data.datasets[0].data.push(usada);
-     configLine2.data.datasets[0].label = "RAM " + Math.round(usada * 100 / total, -1) + "%";
+     configLine2.data.datasets[0].label = "RAM " + Math.round(usada * 100 / total) + "%";
      optionsLine2.scales.yAxes[0].scaleLabel.labelString = "Total "+ total + "MB"
 
      lineChart2.options = optionsLine2;
@@ -54,7 +62,7 @@ function dibujarMonitorCPU() {
                                    beginAtZero: true,
                                    steps: 10,
                                    stepValue: 5,
-                                   max: 8000
+                                   max: 100
                               }
                          }
                     ]
@@ -69,6 +77,7 @@ function dibujarMonitorCPU() {
                type: "line",
                data: {
                     labels: [
+                         "0",
                          "1",
                          "2",
                          "3",
@@ -78,12 +87,22 @@ function dibujarMonitorCPU() {
                          "7",
                          "8",
                          "9",
-                         "10"
+                         "10",
+                         "11",
+                         "12",
+                         "13",
+                         "14",
+                         "15",
+                         "16",
+                         "17",
+                         "18",
+                         "19",
+                         "20"
                     ],
                     datasets: [
                          {
                               label: "CPU",
-                              data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                              data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                               borderColor: "rgb(243, 156, 18)",
                               fill: true,
                               backgroundColor: 'rgb(243, 156, 18, 0.2)',
@@ -132,6 +151,7 @@ function dibujarMonitorRAM() {
                type: "line",
                data: {
                     labels: [
+                         "0",
                          "1",
                          "2",
                          "3",
@@ -146,7 +166,7 @@ function dibujarMonitorRAM() {
                     datasets: [
                          {
                               label: "RAM",
-                              data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                              data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                               borderColor: "rgb( 155, 19, 219 )",
                               fill: true,
                               backgroundColor: 'rgb( 155, 19, 219 , 0.2)',
