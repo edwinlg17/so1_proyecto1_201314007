@@ -264,12 +264,12 @@
     <script src="js/tooplate-scripts.js"></script>
     <script>
         Chart.defaults.global.defaultFontColor = 'white';
-        let ctxLine,
+        var ctxLine,
             optionsLine,
             configLine,
             lineChart;
         
-        let ctxLine2,
+        var ctxLine2,
             optionsLine2,
             configLine2,
             lineChart2;
@@ -279,37 +279,11 @@
             dibujarMonitorRAM(); // Bar Chart
 
             $(window).resize(function () {
-                updateLineChart();             
+                //updateLineChart();             
             });
         })
     </script>
 
-<script>
-    let socket = new WebSocket("ws://192.168.49.129:8080/ws");
-    console.log("Attempting Connection...");
-
-    socket.onopen = () => {
-        console.log("Conexion establecida");
-        socket.send(JSON.stringify({Email:"cliente",Username:"ClienteNode",Message:"Hola"}))
-        //socket.send("hola desde el cliente")
-    };
-    
-    socket.onmessage = event => {
-        const msn = JSON.parse(event.data);
-        console.log(msn);
-    }
-
-    socket.onclose = event => {
-        console.log("Conexion desconectada: ", event);
-        socket.send(JSON.stringify({Email:"cliente",Username:"ClienteNode",Message:"Hola"}))
-        //socket.send("Cliente Desconectado!")
-    };
-
-    socket.onerror = error => {
-        console.log("Error Socket: ", error);
-    };
-
-</script>
 </body>
 
 </html>

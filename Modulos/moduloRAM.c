@@ -19,26 +19,18 @@ static int _escribir(struct seq_file *archivo, void *v){
 	long memoria_free;
 	long memoria_share;
 	long memoria_buffer;
-	long memoria_swap;
-	long libre;
-
-	
 
 	si_meminfo(&inf);
-	memoria_total = inf.totalram * (unsigned long long)inf.mem_unit/ 1024;
-	memoria_free = inf.freeram * (unsigned long long)inf.mem_unit/ 1024;
-	memoria_share = inf.sharedram * (unsigned long long)inf.mem_unit/ 1024;
-	memoria_buffer = inf.bufferram * (unsigned long long)inf.mem_unit/ 1024;
-	memoria_swap = inf.totalswap * (unsigned long long)inf.mem_unit/ 1024;
-	libre = memoria_free + memoria_buffer + memoria_share;
+	memoria_total = inf.totalram * (unsigned long long)inf.mem_unit/ 1024 / 1024;
+	memoria_free = inf.freeram * (unsigned long long)inf.mem_unit/ 1024 / 1024;
+	memoria_share = inf.sharedram * (unsigned long long)inf.mem_unit/ 1024 / 1024;
+	memoria_buffer = inf.bufferram * (unsigned long long)inf.mem_unit/ 1024 / 1024;
 
-	seq_printf(archivo, "Resumen\n");
-	seq_printf(archivo, "memoria total: %8li\n", memoria_total);
-	seq_printf(archivo, "memoria libre: %8li\n", memoria_free);
-	seq_printf(archivo, "memoria compartida: %8li\n", memoria_share);
-	seq_printf(archivo, "memoria buffer: %8li\n", memoria_buffer);
-	seq_printf(archivo, "memoria swap: %8li\n", memoria_swap);
-	seq_printf(archivo, "libre: %8li\n", libre);
+	seq_printf(archivo, "{ \"Total\": %8li", memoria_total);
+	seq_printf(archivo, ", \"Libre\": %8li", memoria_free);
+	seq_printf(archivo, ", \"Compartida\": %8li", memoria_share);
+	seq_printf(archivo, ", \"Buffer\": %8li", memoria_buffer);
+	seq_printf(archivo, ", \"BufferCached\": 0 }");
 	
 	return 0;
 }

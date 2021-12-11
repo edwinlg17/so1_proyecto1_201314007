@@ -4,28 +4,48 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
+	"strconv"
 
+	"fmt"
+	"os/exec"
+	"strings"
 	"time"
+
+	"encoding/json"
 
 	"github.com/gorilla/websocket"
 )
 
+///////////////////////// DECLARACIONES
+// VARIABLES
 var upgrader = websocket.Upgrader{}
 
-type Mensaje struct {
-	Valor1 string `json:"valor1"`
-	Valor2 string `json:"valor2"`
-	Valor3 string `json:"valor3"`
+// STRUCT
+type infoRam struct {
+	Total        int `json:"Total"`
+	Libre        int `json:"Libre"`
+	Compartida   int `json:"Compartida"`
+	Buffer       int `json:"Buffer"`
+	BufferCached int `json:"BufferCached"`
 }
 
-func envio(conn *websocket.Conn) {
-	msg := Mensaje{
-		Valor1: "Esta",
-		Valor2: "es una",
-		Valor3: "prueba",
-	}
+type informacion struct {
+	Ram      infoRam `json:"Ram"`
+	CPU      string  `json:"CPU"`
+	Procesos string  `json:"Procesos"`
+}
 
+///////////////////////// METODOS
+// Metodo encargado de enviar la informacion
+func envio(conn *websocket.Conn) {
 	for {
+		msg := informacion{}
+
+		// obtengo la informacion de la ram
+		msg.Ram = obtenerInformacionRam()
+
+		// envio por el socket la informacion
 		if err := conn.WriteJSON(msg); err != nil {
 			log.Println(err)
 			defer conn.Close()
@@ -33,9 +53,48 @@ func envio(conn *websocket.Conn) {
 		}
 		time.Sleep(time.Duration(1) * time.Second)
 	}
-
 }
 
+func obtenerInformacionRam() infoRam {
+	// leo la informacion del modulo
+	s := ejecutarComando("cat /proc/moduloRAM")
+
+	// convierto la cadena en json
+	msg := infoRam{}
+	json.Unmarshal([]byte(s), &msg)
+
+	// obtengo el valor de la memoria buffer/cached
+	i, err := strconv.Atoi(ejecutarComando("free -m | head -n 2 | tail -1 | awk {'print $6'}"))
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(2)
+	}
+	msg.BufferCached = i
+
+	return msg
+}
+
+// Metodo encargado de ejecutar comandos
+func ejecutarComando(argumento2 string) string {
+	// argumentos
+	comando := "sh"
+	argumento1 := "-c"
+
+	// ejecuto el comando
+	cmd := exec.Command(comando, argumento1, argumento2)
+
+	// vericacion de error
+	stdout, err := cmd.Output()
+	if err != nil {
+		fmt.Println(err.Error())
+		return ""
+	}
+
+	//imprimo la salida
+	return strings.Trim(string(stdout), "\n")
+}
+
+// Web Socket
 func endPoint(w http.ResponseWriter, r *http.Request) {
 	// cors
 	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
@@ -51,7 +110,10 @@ func endPoint(w http.ResponseWriter, r *http.Request) {
 	go envio(ws)
 }
 
+// Metodo Main
 func main() {
+	//fmt.Println(ejecutarComando("free -m | head -n 2 | tail -1 | awk {'print $6'}"))
+	//fmt.Println(ejecutarComando("cat /proc/moduloRAM"))
 	http.HandleFunc("/ws", endPoint)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
