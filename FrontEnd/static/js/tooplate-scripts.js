@@ -12,6 +12,11 @@ socket.onopen = () => {
 socket.onmessage = event => {
      const msg = JSON.parse(event.data);
 
+     console.log(msg.Usuarios);
+     var usuarios = msg.Usuarios.split("\n");
+
+     //console.log(JSON.parse(msg.Procesos));
+     
      var usoCpu = 100 - msg.CPU;
      var total = msg.RAM.Total;
      var libre = msg.RAM.Libre + msg.RAM.BufferCached;
@@ -32,7 +37,6 @@ socket.onmessage = event => {
      lineChart2.options = optionsLine2;
      lineChart2.update();
 
-     //console.log(msn);
 }
 
 socket.onclose = event => {

@@ -1,1 +1,1 @@
-cmd_/home/edwin/Desktop/Proyecto1/Modulos/modules.order := {   echo /home/edwin/Desktop/Proyecto1/Modulos/moduloRAM.ko;   echo /home/edwin/Desktop/Proyecto1/Modulos/moduloCPU.ko; :; } | awk '!x[$$0]++' - > /home/edwin/Desktop/Proyecto1/Modulos/modules.order
+cmd_/home/edwin/Desktop/Proyecto1/Modulos/modules.order := {   echo /home/edwin/Desktop/Proyecto1/Modulos/memo_201314007.ko;   echo /home/edwin/Desktop/Proyecto1/Modulos/cpu_201314007.ko; :; } | awk '!x[$$0]++' - > /home/edwin/Desktop/Proyecto1/Modulos/modules.order

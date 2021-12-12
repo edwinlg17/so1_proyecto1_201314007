@@ -46,12 +46,12 @@ static struct proc_ops operaciones = {
 
 static int init_201314007(void){
 	printk(KERN_INFO "201314007 \n");
-	proc_create("moduloRAM", 0, NULL, &operaciones);
+	proc_create("memo_201314007", 0, NULL, &operaciones);
 	return 0;
 }
 
 static void exit_201314007(void){
-    remove_proc_entry("moduloRAM", NULL);
+    remove_proc_entry("memo_201314007", NULL);
     printk(KERN_INFO "Sistemas Operativos 1 \n");
 }
 

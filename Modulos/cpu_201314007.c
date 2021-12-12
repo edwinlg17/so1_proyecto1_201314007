@@ -9,6 +9,7 @@
 
 #include <linux/sched.h>
 #include <linux/mm.h>
+#include <linux/cred.h>
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Edwin Alfredo Lopez Gomez");	
@@ -21,25 +22,32 @@ struct list_head *hijos;
 static int _escribir(struct seq_file *archivo, void *v){
 	unsigned long rss;
 
+	seq_printf(archivo, "[ { \"Nombre\": \"\", \"PID\": -1, \"Estado\": -1, \"RAM\": -1, \"UID\": -1, \"SubProcesos\": [] }");
+
 	for_each_process(proceso){
 		if (proceso->mm) {
 			rss = get_mm_rss(proceso->mm) << PAGE_SHIFT;
-			seq_printf(archivo, "nombre: %s, PID: %d, estado: %ld, ram: %lu \n", proceso->comm, proceso->pid, proceso->state, rss/1024);
+			seq_printf(archivo, ", { \"Nombre\": \"%s\", \"PID\": %d, \"Estado\": %ld, \"RAM\": %lu, \"UID\": %d, \"SubProcesos\": ", proceso->comm, proceso->pid, proceso->state, rss/1024, __kuid_val(proceso->cred->uid));
 		} else {
-			seq_printf(archivo, "nombre: %s, PID: %d, estado:%ld \n", proceso->comm, proceso->pid, proceso->state);
+			seq_printf(archivo, ", { \"Nombre\": \"%s\", \"PID\": %d, \"Estado\": %ld, \"RAM\": 0, \"UID\": %d, \"SubProcesos\": ", proceso->comm, proceso->pid, proceso->state, __kuid_val(proceso->cred->uid));
 		}
+
+		seq_printf(archivo, "[ { \"Nombre\": \"\", \"PID\": -1, \"Estado\": -1, \"RAM\": -1, \"UID\": -1, \"SubProcesos\": [] }");
 
 		list_for_each(hijos, &(proceso->children)){
 			hijo = list_entry(hijos, struct task_struct, sibling);
 
 			if (hijo->mm) {
 				rss = get_mm_rss(hijo->mm) << PAGE_SHIFT;
-				seq_printf(archivo, "\tnombre: %s, PID: %d, estado: %ld, ram: %lu \n", hijo->comm, hijo->pid, hijo->state, rss/1024);
+				seq_printf(archivo, ", { \"Nombre\": \"%s\", \"PID\": %d, \"Estado\": %ld, \"RAM\": %lu, \"UID\": %d, \"SubProcesos\": [] }", hijo->comm, hijo->pid, hijo->state, rss/1024, __kuid_val(hijo->cred->uid));
 			} else {
-				seq_printf(archivo, "\tnombre: %s, PID: %d, estado:%ld \n", hijo->comm, hijo->pid, hijo->state);
+				seq_printf(archivo, ", { \"Nombre\": \"%s\", \"PID\": %d, \"Estado\": %ld, \"RAM\": 0, \"UID\": %d, \"SubProcesos\": [] }", hijo->comm, hijo->pid, hijo->state, __kuid_val(hijo->cred->uid));
 			}
 		}
+
+		seq_printf(archivo, "]}");
 	}
+	seq_printf(archivo, "]");
 	return 0;
 }
 
@@ -54,12 +62,12 @@ static struct proc_ops operaciones = {
 
 static int init_201314007(void){
 	printk(KERN_INFO "201314007 \n");
-	proc_create("moduloCPU", 0, NULL, &operaciones);
+	proc_create("cpu_201314007", 0, NULL, &operaciones);
 	return 0;
 }
 
 static void exit_201314007(void){
-    remove_proc_entry("moduloCPU", NULL);
+    remove_proc_entry("cpu_201314007", NULL);
     printk(KERN_INFO "Sistemas Operativos 1 \n");
 }
 

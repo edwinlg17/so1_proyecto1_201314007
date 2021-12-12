@@ -22,6 +22,15 @@ import (
 var upgrader = websocket.Upgrader{}
 
 // STRUCT
+/*type infoProcesos struct {
+	Nombre      string         `json:"Nombre"`
+	PID         int            `json:"PID"`
+	Estado      int            `json:"Estado"`
+	RAM         int            `json:"RAM"`
+	UID         int            `json:"UID"`
+	SubProcesos []infoProcesos `json:"SubProcesos"`
+}*/
+
 type infoRam struct {
 	Total        int `json:"Total"`
 	Libre        int `json:"Libre"`
@@ -34,6 +43,7 @@ type informacion struct {
 	RAM      infoRam `json:"RAM"`
 	CPU      float64 `json:"CPU"`
 	Procesos string  `json:"Procesos"`
+	Usuarios string  `json:"Usuarios"`
 }
 
 ///////////////////////// METODOS
@@ -45,7 +55,13 @@ func envio(conn *websocket.Conn) {
 		// obtengo la informacion de la ram
 		msg.RAM = obtenerInformacionRam()
 
+		// obtengo la informacion de la cpu
 		msg.CPU = obtenerInformacionCPU()
+
+		// obtengo la informacion de los proceso
+		msg.Procesos = ejecutarComando("cat /proc/cpu_201314007")
+
+		msg.Usuarios = ejecutarComando("cat /etc/passwd | tr \":\" \" \" | awk {'print $1, $3'}")
 
 		// envio por el socket la informacion
 		if err := conn.WriteJSON(msg); err != nil {
@@ -66,7 +82,7 @@ func obtenerInformacionCPU() float64 {
 
 func obtenerInformacionRam() infoRam {
 	// leo la informacion del modulo
-	s := ejecutarComando("cat /proc/moduloRAM")
+	s := ejecutarComando("cat /proc/memo_201314007")
 
 	// convierto la cadena en json
 	msg := infoRam{}
