@@ -21,15 +21,19 @@ import (
 // VARIABLES
 var upgrader = websocket.Upgrader{}
 
+var bufferString = ""
+var bufferInfoProceso []infoProceso
+
 // STRUCT
-/*type infoProcesos struct {
-	Nombre      string         `json:"Nombre"`
-	PID         int            `json:"PID"`
-	Estado      int            `json:"Estado"`
-	RAM         int            `json:"RAM"`
-	UID         int            `json:"UID"`
-	SubProcesos []infoProcesos `json:"SubProcesos"`
-}*/
+type infoProceso struct {
+	Nombre      string        `json:"Nombre"`
+	PID         int           `json:"PID"`
+	Estado      int           `json:"Estado"`
+	RAM         int           `json:"RAM"`
+	UID         int           `json:"UID"`
+	Usuario     string        `json:"Usuario"`
+	SubProcesos []infoProceso `json:"SubProcesos"`
+}
 
 type infoRam struct {
 	Total        int `json:"Total"`
@@ -40,16 +44,16 @@ type infoRam struct {
 }
 
 type informacion struct {
-	RAM      infoRam `json:"RAM"`
-	CPU      float64 `json:"CPU"`
-	Procesos string  `json:"Procesos"`
-	Usuarios string  `json:"Usuarios"`
+	RAM      infoRam       `json:"RAM"`
+	CPU      float64       `json:"CPU"`
+	Procesos []infoProceso `json:"Procesos"`
 }
 
 ///////////////////////// METODOS
 // Metodo encargado de enviar la informacion
 func envio(conn *websocket.Conn) {
 	for {
+		time.Sleep(time.Duration(500) * time.Millisecond)
 		msg := informacion{}
 
 		// obtengo la informacion de la ram
@@ -59,9 +63,7 @@ func envio(conn *websocket.Conn) {
 		msg.CPU = obtenerInformacionCPU()
 
 		// obtengo la informacion de los proceso
-		msg.Procesos = ejecutarComando("cat /proc/cpu_201314007")
-
-		msg.Usuarios = ejecutarComando("cat /etc/passwd | tr \":\" \" \" | awk {'print $1, $3'}")
+		msg.Procesos = obtenerInformacionProcesos()
 
 		// envio por el socket la informacion
 		if err := conn.WriteJSON(msg); err != nil {
@@ -69,7 +71,39 @@ func envio(conn *websocket.Conn) {
 			defer conn.Close()
 			return
 		}
-		time.Sleep(time.Duration(1) * time.Second)
+	}
+}
+
+func obtenerInformacionProcesos() []infoProceso {
+	// leo la informacion del modulo
+	s := ejecutarComando("cat /proc/cpu_201314007")
+
+	if s != bufferString {
+		bufferString = s
+
+		// convierto la cadena en json
+		msg := []infoProceso{}
+		json.Unmarshal([]byte(s), &msg)
+
+		msg = msg[1:]
+
+		usuario := ""
+		for ind, ele := range msg {
+			msg[ind].SubProcesos = ele.SubProcesos[1:]
+
+			usuario = ejecutarComando("getent passwd " + strconv.Itoa(ele.UID) + " | cut -d: -f1")
+			msg[ind].Usuario = strings.Replace(usuario, "\n", "", -1)
+
+			for ind2, ele2 := range msg[ind].SubProcesos {
+				usuario = ejecutarComando("getent passwd " + strconv.Itoa(ele2.UID) + " | cut -d: -f1")
+				msg[ind].SubProcesos[ind2].Usuario = strings.Replace(usuario, "\n", "", -1)
+			}
+		}
+
+		bufferInfoProceso = msg
+		return msg
+	} else {
+		return bufferInfoProceso
 	}
 }
 

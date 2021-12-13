@@ -12,11 +12,11 @@ socket.onopen = () => {
 socket.onmessage = event => {
      const msg = JSON.parse(event.data);
 
-     console.log(msg.Usuarios);
-     var usuarios = msg.Usuarios.split("\n");
+     //console.log(msg.Procesos);
+     //var usuarios = msg.Usuarios.split("\n");
 
      //console.log(JSON.parse(msg.Procesos));
-     
+
      var usoCpu = 100 - msg.CPU;
      var total = msg.RAM.Total;
      var libre = msg.RAM.Libre + msg.RAM.BufferCached;
@@ -32,10 +32,100 @@ socket.onmessage = event => {
      configLine2.data.datasets[0].data.shift();
      configLine2.data.datasets[0].data.push(usada);
      configLine2.data.datasets[0].label = "RAM " + Math.round(usada * 100 / total) + "%";
-     optionsLine2.scales.yAxes[0].scaleLabel.labelString = "Total "+ total + "MB"
+     optionsLine2.scales.yAxes[0].scaleLabel.labelString = "Total " + total + "MB"
 
      lineChart2.options = optionsLine2;
      lineChart2.update();
+
+     var textoAcordeon = "";
+
+     for (ele of msg.Procesos) {
+          textoAcordeon += ''
+               + '<div class="accordion-item">'
+               + '     <h2 class="accordion-header" id="headingThree">'
+               + '          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"'
+               + '               data-bs-target="#proceso' + ele.PID + '" aria-expanded="false"'
+               + '               aria-controls="proceso' + ele.PID + '">'
+               + '<table class="table-striped table-hover" style="width:100%">'
+               + '    <thead>'
+               + '        <tr>'
+               + '            <th scope="col">PID</th>'
+               + '            <th scope="col">NOMBRE</th>'
+               + '            <th scope="col">USUARIO</th>'
+               + '            <th scope="col">ESTADO</th>'
+               + '            <th scope="col">%RAM</th>'
+               + '        </tr>'
+               + '    </thead>'
+               + '    <tbody>'
+               + '        <tr>'
+               + '            <th scope="row">' + ele.PID + '</th>'
+               + '            <td>' + ele.Nombre + '</td>'
+               + '            <td>' + ele.Usuario + '</td>'
+               + '            <td>' + ele.Estado + '</td>'
+               + '            <td>' + ele.RAM + '</td>'
+               + '        </tr>'
+               + '    </tbody>'
+               + '</table>'
+               + '          </button>'
+               + '     </h2>'
+               + '     <div id="proceso' + ele.PID + '" class="accordion-collapse collapse"'
+               + '          aria-labelledby="headingThree" data-bs-parent="#accordionExample">'
+               + '          <div class="accordion-body">';
+
+          for (ele2 of ele.SubProcesos) {
+               textoAcordeon += ''
+                    + '<table class="table-striped table-hover" style="width:100%">'
+                    + '    <thead>'
+                    + '        <tr>'
+                    + '            <th scope="col">PID</th>'
+                    + '            <th scope="col">NOMBRE</th>'
+                    + '            <th scope="col">USUARIO</th>'
+                    + '            <th scope="col">ESTADO</th>'
+                    + '            <th scope="col">%RAM</th>'
+                    + '        </tr>'
+                    + '    </thead>'
+                    + '    <tbody>'
+                    + '        <tr>'
+                    + '            <th scope="row">' + ele2.PID + '</th>'
+                    + '            <td>' + ele2.Nombre + '</td>'
+                    + '            <td>' + ele2.Usuario + '</td>'
+                    + '            <td>' + ele2.Estado + '</td>'
+                    + '            <td>' + ele2.RAM + '</td>'
+                    + '        </tr>'
+                    + '    </tbody>'
+                    + '</table>';
+          }
+
+          textoAcordeon += ''
+               + '          </div>'
+               + '     </div>'
+               + '</div>\n';
+     }
+
+     /*
+     
+     
+     
+     
+     
+     */
+
+
+
+
+     var acordeon = document.getElementById("acordeonProcesos");
+     acordeon.innerHTML = "";
+     acordeon.innerHTML = textoAcordeon;
+
+     /*
+     
+     + '                       <th scope="row">' + ele.PID + '</th>\n'
+     + '                       <td>' + ele.Nombre + '</td>\n'
+     + '                       <td>' + ele.Usuario + '</td>\n'
+     + '                       <td>' + ele.Estado + '</td>\n'
+     + '                       <td>' + ele.RAM + '</td>\n'
+     
+     */
 
 }
 
