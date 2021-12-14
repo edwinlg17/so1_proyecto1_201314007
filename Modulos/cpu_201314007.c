@@ -22,26 +22,26 @@ struct list_head *hijos;
 static int _escribir(struct seq_file *archivo, void *v){
 	unsigned long rss;
 
-	seq_printf(archivo, "[ { \"Nombre\": \"\", \"PID\": -1, \"Estado\": -1, \"RAM\": -1, \"UID\": -1, \"Usuario\": \"\", \"SubProcesos\": [] }");
+	seq_printf(archivo, "[ { \"Nombre\": \"\", \"PID\": -1, \"Estado\": \"-1\", \"RAM\": -1, \"UID\": -1, \"Usuario\": \"\", \"SubProcesos\": [] }");
 
 	for_each_process(proceso){
 		if (proceso->mm) {
 			rss = get_mm_rss(proceso->mm) << PAGE_SHIFT;
-			seq_printf(archivo, ", { \"Nombre\": \"%s\", \"PID\": %d, \"Estado\": %ld, \"RAM\": %lu, \"UID\": %d, \"Usuario\": \"\", \"SubProcesos\": ", proceso->comm, proceso->pid, proceso->state, rss/1024, __kuid_val(proceso->cred->uid));
+			seq_printf(archivo, ", { \"Nombre\": \"%s\", \"PID\": %d, \"Estado\": \"%ld\", \"RAM\": %lu, \"UID\": %d, \"Usuario\": \"\", \"SubProcesos\": ", proceso->comm, proceso->pid, proceso->state, rss, __kuid_val(proceso->cred->uid));
 		} else {
-			seq_printf(archivo, ", { \"Nombre\": \"%s\", \"PID\": %d, \"Estado\": %ld, \"RAM\": 0, \"UID\": %d, \"Usuario\": \"\", \"SubProcesos\": ", proceso->comm, proceso->pid, proceso->state, __kuid_val(proceso->cred->uid));
+			seq_printf(archivo, ", { \"Nombre\": \"%s\", \"PID\": %d, \"Estado\": \"%ld\", \"RAM\": 0, \"UID\": %d, \"Usuario\": \"\", \"SubProcesos\": ", proceso->comm, proceso->pid, proceso->state, __kuid_val(proceso->cred->uid));
 		}
 
-		seq_printf(archivo, "[ { \"Nombre\": \"\", \"PID\": -1, \"Estado\": -1, \"RAM\": -1, \"UID\": -1, \"Usuario\": \"\", \"SubProcesos\": [] }");
+		seq_printf(archivo, "[ { \"Nombre\": \"\", \"PID\": -1, \"Estado\": \"-1\", \"RAM\": -1, \"UID\": -1, \"Usuario\": \"\", \"SubProcesos\": [] }");
 
 		list_for_each(hijos, &(proceso->children)){
 			hijo = list_entry(hijos, struct task_struct, sibling);
 
 			if (hijo->mm) {
 				rss = get_mm_rss(hijo->mm) << PAGE_SHIFT;
-				seq_printf(archivo, ", { \"Nombre\": \"%s\", \"PID\": %d, \"Estado\": %ld, \"RAM\": %lu, \"UID\": %d, \"Usuario\": \"\", \"SubProcesos\": [] }", hijo->comm, hijo->pid, hijo->state, rss/1024, __kuid_val(hijo->cred->uid));
+				seq_printf(archivo, ", { \"Nombre\": \"%s\", \"PID\": %d, \"Estado\": \"%ld\", \"RAM\": %lu, \"UID\": %d, \"Usuario\": \"\", \"SubProcesos\": [] }", hijo->comm, hijo->pid, hijo->state, rss, __kuid_val(hijo->cred->uid));
 			} else {
-				seq_printf(archivo, ", { \"Nombre\": \"%s\", \"PID\": %d, \"Estado\": %ld, \"RAM\": 0, \"UID\": %d, \"Usuario\": \"\", \"SubProcesos\": [] }", hijo->comm, hijo->pid, hijo->state, __kuid_val(hijo->cred->uid));
+				seq_printf(archivo, ", { \"Nombre\": \"%s\", \"PID\": %d, \"Estado\": \"%ld\", \"RAM\": 0, \"UID\": %d, \"Usuario\": \"\", \"SubProcesos\": [] }", hijo->comm, hijo->pid, hijo->state, __kuid_val(hijo->cred->uid));
 			}
 		}
 
@@ -61,14 +61,14 @@ static struct proc_ops operaciones = {
 };
 
 static int init_201314007(void){
-	printk(KERN_INFO "201314007 \n");
+	printk(KERN_INFO "Edwin Alfredo Lopez Gomez \n");
 	proc_create("cpu_201314007", 0, NULL, &operaciones);
 	return 0;
 }
 
 static void exit_201314007(void){
     remove_proc_entry("cpu_201314007", NULL);
-    printk(KERN_INFO "Sistemas Operativos 1 \n");
+    printk(KERN_INFO "Diciembre 2021 \n");
 }
 
 module_init(init_201314007);

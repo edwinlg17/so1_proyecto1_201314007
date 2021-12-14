@@ -21,17 +21,18 @@ socket.onmessage = event => {
      var total = msg.RAM.Total;
      var libre = msg.RAM.Libre + msg.RAM.BufferCached;
      var usada = total - libre;
+     var usoRam = Math.round(usada * 100 / total);
 
      configLine.data.datasets[0].data.shift();
      configLine.data.datasets[0].data.push(usoCpu);
-     configLine.data.datasets[0].label = "RAM " + Math.round(usoCpu) + "%";
+     configLine.data.datasets[0].label = "CPU " + Math.round(usoCpu) + "%";
 
      lineChart.options = optionsLine;
      lineChart.update();
 
      configLine2.data.datasets[0].data.shift();
-     configLine2.data.datasets[0].data.push(usada);
-     configLine2.data.datasets[0].label = "RAM " + Math.round(usada * 100 / total) + "%";
+     configLine2.data.datasets[0].data.push(usoRam);
+     configLine2.data.datasets[0].label = "RAM " + usada + "MB " + usoRam + "%";
      optionsLine2.scales.yAxes[0].scaleLabel.labelString = "Total " + total + "MB"
 
      lineChart2.options = optionsLine2;
@@ -46,23 +47,23 @@ socket.onmessage = event => {
                + '          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"'
                + '               data-bs-target="#proceso' + ele.PID + '" aria-expanded="false"'
                + '               aria-controls="proceso' + ele.PID + '">'
-               + '<table class="table-striped table-hover" style="width:100%">'
+               + '<table style="width:100%">'
                + '    <thead>'
                + '        <tr>'
                + '            <th scope="col">PID</th>'
                + '            <th scope="col">NOMBRE</th>'
                + '            <th scope="col">USUARIO</th>'
                + '            <th scope="col">ESTADO</th>'
-               + '            <th scope="col">%RAM</th>'
+               + '            <th scope="col">RAM</th>'
                + '        </tr>'
                + '    </thead>'
                + '    <tbody>'
                + '        <tr>'
-               + '            <th scope="row">' + ele.PID + '</th>'
-               + '            <td>' + ele.Nombre + '</td>'
-               + '            <td>' + ele.Usuario + '</td>'
-               + '            <td>' + ele.Estado + '</td>'
-               + '            <td>' + ele.RAM + '</td>'
+               + '            <th scope="row" style="width:15px">' + ele.PID + '</th>'
+               + '            <td style="width:150px">' + ele.Nombre + '</td>'
+               + '            <td style="width:150px">' + ele.Usuario + '</td>'
+               + '            <td style="width:150px">' + ele.Estado + '</td>'
+               + '            <td style="width:150px">' + Math.round(ele.RAM / 1024 / 1024) + '</td>'
                + '        </tr>'
                + '    </tbody>'
                + '</table>'
@@ -70,64 +71,107 @@ socket.onmessage = event => {
                + '     </h2>'
                + '     <div id="proceso' + ele.PID + '" class="accordion-collapse collapse"'
                + '          aria-labelledby="headingThree" data-bs-parent="#accordionExample">'
-               + '          <div class="accordion-body">';
+               + '          <div class="accordion-body">'
+               + '<table style="width:100%">'
+               + '    <thead>'
+               + '        <tr>'
+               + '            <th scope="col">PID</th>'
+               + '            <th scope="col">NOMBRE</th>'
+               + '        </tr>'
+               + '    </thead>'
+               + '    <tbody>';
+
 
           for (ele2 of ele.SubProcesos) {
                textoAcordeon += ''
-                    + '<table class="table-striped table-hover" style="width:100%">'
-                    + '    <thead>'
                     + '        <tr>'
-                    + '            <th scope="col">PID</th>'
-                    + '            <th scope="col">NOMBRE</th>'
-                    + '            <th scope="col">USUARIO</th>'
-                    + '            <th scope="col">ESTADO</th>'
-                    + '            <th scope="col">%RAM</th>'
+                    + '            <th style="width:150px" scope="row">' + ele2.PID + '</th>'
+                    + '            <td style="width:150px">' + ele2.Nombre + '</td>'
                     + '        </tr>'
-                    + '    </thead>'
-                    + '    <tbody>'
-                    + '        <tr>'
-                    + '            <th scope="row">' + ele2.PID + '</th>'
-                    + '            <td>' + ele2.Nombre + '</td>'
-                    + '            <td>' + ele2.Usuario + '</td>'
-                    + '            <td>' + ele2.Estado + '</td>'
-                    + '            <td>' + ele2.RAM + '</td>'
-                    + '        </tr>'
-                    + '    </tbody>'
-                    + '</table>';
           }
 
           textoAcordeon += ''
+               + '    </tbody>'
+               + '</table>'
                + '          </div>'
                + '     </div>'
                + '</div>\n';
      }
 
-     /*
-     
-     
-     
-     
-     
-     */
-
-
-
-
      var acordeon = document.getElementById("acordeonProcesos");
      acordeon.innerHTML = "";
      acordeon.innerHTML = textoAcordeon;
 
-     /*
-     
-     + '                       <th scope="row">' + ele.PID + '</th>\n'
-     + '                       <td>' + ele.Nombre + '</td>\n'
-     + '                       <td>' + ele.Usuario + '</td>\n'
-     + '                       <td>' + ele.Estado + '</td>\n'
-     + '                       <td>' + ele.RAM + '</td>\n'
-     
-     */
+
+     var textoTabla = ""
+     textoTabla += '<h2 class="tm-block-title">Lista de Procesos</h2>'
+          + '<table style="width:100%">'
+          + '    <thead>'
+          + '        <tr>'
+          + '            <th scope="col">PID</th>'
+          + '            <th scope="col">NOMBRE</th>'
+          + '            <th scope="col">USUARIO</th>'
+          + '            <th scope="col">ESTADO</th>'
+          + '            <th scope="col">RAM</th>'
+          + '            <th scope="col">Kill</th>'
+          + '        </tr>'
+          + '    </thead>'
+          + '    <tbody>';
+
+     for (ele of msg.Procesos) {
+          textoTabla += ""
+               + '        <tr>'
+               + '            <th scope="row" style="width:15px">' + ele.PID + '</th>'
+               + '            <td style="width:150px">' + ele.Nombre + '</td>'
+               + '            <td style="width:150px">' + ele.Usuario + '</td>'
+               + '            <td style="width:150px">' + ele.Estado + '</td>'
+               + '            <td style="width:150px">' + Math.round(ele.RAM / 1024 / 1024) + '</td>'
+               + '            <td style="width:150px"><button type="button" id="' + ele.PID + '" class="btn btn-outline-danger" onclick="killApp(this)">Kill</button></td>'
+               + '        </tr>';
+
+
+          for (ele2 of ele.SubProcesos) {
+               textoTabla += ''
+                    + '        <tr>'
+                    + '            <th style="width:150px" scope="row">' + ele2.PID + '</th>'
+                    + '            <td style="width:150px">' + ele2.Nombre + '</td>'
+                    + '            <td style="width:150px">' + ele2.Usuario + '</td>'
+                    + '            <td style="width:150px">' + ele2.Estado + '</td>'
+                    + '            <td style="width:150px">' + Math.round(ele2.RAM / 1024 / 1024) + '</td>'
+                    + '            <td style="width:150px"><button type="button" id="' + ele2.PID + '" class="btn btn-outline-danger" onclick="killApp(this)">Kill</button></td>'
+                    + '        </tr>';
+          }
+     }
+     textoTabla += ''
+          + '    </tbody>'
+          + '</table>';
+
+     var tabla = document.getElementById("listaProcesos");
+     tabla.innerHTML = "";
+     tabla.innerHTML = textoTabla;
 
 }
+
+function killApp(com) {
+     //alert(com.id);
+     const url = "http://localhost:8080/postKill";
+     const data = { PID: com.id };
+
+     const othePram = {
+          headers: {
+               'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data),
+          method: "POST"
+     };
+
+     fetch(url, othePram)
+     .then(data=>{return data.json()})
+     .then(res=>{alert(res.PID)})
+     .catch(error=>console.log(error))
+
+}
+
 
 socket.onclose = event => {
      console.log("Conexion desconectada: ", event);
@@ -230,7 +274,7 @@ function dibujarMonitorRAM() {
                                    beginAtZero: true,
                                    steps: 10,
                                    stepValue: 5,
-                                   max: 8000
+                                   max: 100
                               }
                          }
                     ]
