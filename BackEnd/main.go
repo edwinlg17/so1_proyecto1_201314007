@@ -247,11 +247,7 @@ func postKill(w http.ResponseWriter, r *http.Request) {
 // Metodo Main
 func main() {
 	http.HandleFunc("/ws", endPoint)
-
 	http.HandleFunc("/postKill", postKill)
-
-	//router := mux.NewRouter().StrictSlash(true)
-	//router.HandleFunc("/postKill", postKill).Methods("POST")
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

@@ -35,29 +35,6 @@
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul class="navbar-nav mx-auto h-100">
 
-                        <li class="nav-item">
-                            <a class="nav-link active" href="#">
-                                <i class="fas fa-tachometer-alt"></i>
-                                Monitor
-                                <span class="sr-only">(current)</span>
-                            </a>
-                        </li>
-
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <i class="far fa-file-alt"></i>
-                                <span>
-                                    Otros <i class="fas fa-angle-down"></i>
-                                </span>
-                            </a>
-                            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                <a class="dropdown-item" href="#">Opcion 1</a>
-                                <a class="dropdown-item" href="#">Opcion 2</a>
-                                <a class="dropdown-item" href="#">Opcion 3</a>
-                            </div>
-                        </li>
-
                     </ul>
                 </div>
             </div>
@@ -87,20 +64,36 @@
                     </div>
                 </div>
 
+                <!-- Tabla Resumen -->
                 <div class="col-12 tm-block-col">
-                    <div class="tm-bg-primary-dark tm-block tm-block-taller tm-block-scroll" id="listaProcesos">
-                        <h2 class="tm-block-title">Lista de Procesos</h2>
-                        
+                    <div class="tm-bg-primary-dark tm-block tm-block-taller tm-block-scroll" id="tablaResumen">
+                        <h2 class="tm-block-title">Tabla Resumen</h2>
+
                     </div>
                 </div>
 
+                <!-- Tabla de Procesos -->
                 <div class="col-12 tm-block-col">
                     <div class="tm-bg-primary-dark tm-block tm-block-taller tm-block-scroll">
-                        <h2 class="tm-block-title">Arbol de Procesos</h2>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked" checked onchange="verificarLista(this)">
+                            <label class="form-check-label" for="flexSwitchCheckChecked"><h2 class="tm-block-title">Lista de Procesos</h2></label>
+                        </div>
+                        <div id="listaProcesos"></div>
 
+                    </div>
+                </div>
+
+                <!-- Arbol de Procesos -->
+                
+                <div class="col-12 tm-block-col">
+                    <div class="tm-bg-primary-dark tm-block tm-block-taller tm-block-scroll">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked" checked onchange="verificarArbol(this)">
+                            <label class="form-check-label" for="flexSwitchCheckChecked"><h2 class="tm-block-title">Arbol de Procesos</h2></label>
+                        </div>
                         <div class="accordion" id="acordeonProcesos">
                         </div>
-
                     </div>
                 </div>
 
